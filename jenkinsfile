@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Terrafrom init') {
+            steps {
+                sh 'terrafrom init'
+            }
+        }  
+    stage('Terrafrom plan') {
+        steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-creds'
+        ]]) 
+             sh 'terrafrom plan -var-file=terrafrom.tfvars'
+            }
+        } 
+    stage('Terrafrom apply') {
+            steps {
+                sh 'terrafrom apply -var-file=terrafrom.tfvars'
+            }
+        }    
+    }
+}
